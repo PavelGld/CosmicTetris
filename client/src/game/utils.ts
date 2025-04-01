@@ -17,26 +17,44 @@ export const checkCollision = (
   board: (string | 0 | 1 | 2)[][],
   { x: moveX, y: moveY }: { x: number; y: number }
 ): boolean => {
-  // Using for loops for better readability
-  for (let y = 0; y < player.tetromino.length; y++) {
-    for (let x = 0; x < player.tetromino[y].length; x++) {
-      // 1. Check that we're on a tetromino cell
-      if (player.tetromino[y][x] !== 0) {
-        // 2. Check if our move is inside the game board height (y)
-        // We don't check for negative y (above the game board) to allow spawning
-        if (
-          !board[y + player.pos.y + moveY] ||
-          // 3. Check that our move is inside the game board width (x)
-          !board[y + player.pos.y + moveY][x + player.pos.x + moveX] ||
-          // 4. Check that the cell we're moving to isn't set to clear
-          board[y + player.pos.y + moveY][x + player.pos.x + moveX] !== 0
-        ) {
-          return true;
+  try {
+    // Safety check for invalid player data
+    if (!player || !player.tetromino || !Array.isArray(player.tetromino)) {
+      console.error("Invalid player data in checkCollision", player);
+      return true; // Assume collision for safety
+    }
+    
+    // Safety check for invalid board
+    if (!board || !Array.isArray(board) || board.length === 0) {
+      console.error("Invalid board data in checkCollision", board);
+      return true; // Assume collision for safety
+    }
+    
+    // Using for loops for better readability
+    for (let y = 0; y < player.tetromino.length; y++) {
+      for (let x = 0; x < player.tetromino[y].length; x++) {
+        // 1. Check that we're on a tetromino cell (has content)
+        if (player.tetromino[y][x] !== 0) {
+          const newY = y + player.pos.y + moveY;
+          const newX = x + player.pos.x + moveX;
+          
+          // 2. Check if our move is outside the board boundaries
+          if (newY < 0 || newY >= board.length || newX < 0 || newX >= board[0].length) {
+            return true; // Out of bounds = collision
+          }
+          
+          // 3. Check if there's already a piece at the target position (not empty)
+          if (board[newY][newX] !== 0) {
+            return true; // Cell is occupied = collision
+          }
         }
       }
     }
+    return false; // No collision detected
+  } catch (error) {
+    console.error("Error in checkCollision:", error);
+    return true; // Assume collision on error for safety
   }
-  return false;
 };
 
 /**

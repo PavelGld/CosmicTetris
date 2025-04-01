@@ -256,10 +256,14 @@ const GameBoard: React.FC = () => {
     try {
       // Calculate drop distance with a safety limit to prevent infinite loops
       let dropDistance = 0;
-      const maxDistance = BOARD_HEIGHT + HIDDEN_ROWS;
+      // Set a safe maximum distance that won't exceed board boundaries
+      const maxSafeDistance = Math.min(
+        BOARD_HEIGHT - 1, // Ensure we stay within visible board
+        board.length - player.pos.y - 1 // Ensure we don't exceed board array
+      );
       
       while (
-        dropDistance < maxDistance && 
+        dropDistance < maxSafeDistance && 
         !checkCollision(player, board, { x: 0, y: dropDistance + 1 })
       ) {
         dropDistance += 1;
@@ -272,30 +276,27 @@ const GameBoard: React.FC = () => {
         addHardDropPoints(dropDistance);
       }
       
-      // Check if dropping would cause immediate game over
-      const newY = player.pos.y + dropDistance;
-      const wouldCauseGameOver = newY < HIDDEN_ROWS && dropDistance > 0;
+      // Check if the player is within the valid range
+      if (player.pos.y + dropDistance >= board.length) {
+        console.log("Hard drop would exceed board boundaries");
+        // Adjust to maximum safe distance
+        dropDistance = board.length - player.pos.y - 1;
+      }
       
-      if (wouldCauseGameOver) {
-        console.log("Hard drop would cause game over");
-        // Just do a normal drop instead to let the game over logic handle it normally
-        updatePlayerPos({
-          x: 0,
-          y: 1,
-          collided: false
-        });
-      } else {
-        // Update player position normally
+      // Update player position safely
+      if (dropDistance > 0) {
         updatePlayerPos({
           x: 0,
           y: dropDistance,
-          collided: dropDistance > 0 // Only set collided if we actually moved
+          collided: true
         });
+        // Play hit sound for feedback
+        playHit();
       }
     } catch (error) {
       console.error("Error in hardDrop:", error);
     }
-  }, [gameOver, gamePhase, player, board, updatePlayerPos, addHardDropPoints]);
+  }, [gameOver, gamePhase, player, board, updatePlayerPos, addHardDropPoints, playHit]);
   
   // Soft drop the tetromino
   const softDrop = useCallback(() => {
@@ -359,11 +360,23 @@ const GameBoard: React.FC = () => {
   
   const visibleRows = board.slice(HIDDEN_ROWS);
   
-  // Debug: Log the game board state and player position
+  // Debug: Log the game board state and player position safely
   console.log("Player position:", player.pos);
   console.log("Player tetromino:", player.tetromino);
   console.log("Player color:", player.color);
-  console.log("Sample board cells:", board[player.pos.y][player.pos.x], board[player.pos.y][player.pos.x+1]);
+  
+  // Safely check board cells
+  try {
+    if (player.pos.y >= 0 && player.pos.y < board.length && 
+        player.pos.x >= 0 && player.pos.x < board[0].length) {
+      console.log("Sample board cells:", board[player.pos.y][player.pos.x], 
+        player.pos.x + 1 < board[0].length ? board[player.pos.y][player.pos.x+1] : 'out of bounds');
+    } else {
+      console.log("Player position out of bounds");
+    }
+  } catch (e) {
+    console.log("Error accessing board cells:", e);
+  }
   
   return (
     <div

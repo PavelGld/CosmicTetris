@@ -58,14 +58,19 @@ const Cell: React.FC<CellProps> = ({ type }) => {
     }
     
     // Handle string types (colors)
+    // If the type is an empty string, use a fallback color
+    const cellColor = typeof type === 'string' && type.trim() !== '' 
+      ? type 
+      : '#888888'; // Fallback color for empty strings
+    
     return (
       <div 
         style={{
           width: CELL_SIZE,
           height: CELL_SIZE,
-          background: type as string,
+          background: cellColor,
           border: '2px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: `inset 0 0 10px 0 ${type}99, 0 0 5px 0 ${type}99`,
+          boxShadow: `inset 0 0 10px 0 ${cellColor}99, 0 0 5px 0 ${cellColor}99`,
           position: 'relative',
         }}
       >

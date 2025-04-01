@@ -14,12 +14,14 @@ interface PlayerState {
 }
 
 export const usePlayer = () => {
+  // Initialize with a random tetromino to ensure we have color and type
+  const initialTetromino = getRandomTetromino();
   const [player, setPlayer] = useState<PlayerState>({
     pos: { x: 0, y: 0 },
     tetromino: [[0]],
     collided: false,
-    color: '',
-    type: ''
+    color: initialTetromino.color, // Set an initial color
+    type: initialTetromino.type    // Set an initial type
   });
   
   const [nextPiece, setNextPiece] = useState<Tetromino>(getRandomTetromino());
@@ -41,13 +43,23 @@ export const usePlayer = () => {
     });
   }, [nextPiece]);
 
-  // Function to update the player position
+  // Function to update the player position with boundary checks
   const updatePlayerPos = useCallback(({ x, y, collided }: { x: number; y: number; collided: boolean }) => {
-    setPlayer(prev => ({
-      ...prev,
-      pos: { x: (prev.pos.x + x), y: (prev.pos.y + y) },
-      collided
-    }));
+    setPlayer(prev => {
+      // Calculate new position
+      const newX = prev.pos.x + x;
+      const newY = Math.min(prev.pos.y + y, BOARD_WIDTH * 2); // Set a reasonable maximum for Y to prevent overflow
+      
+      // Apply the changes with boundary checks
+      return {
+        ...prev,
+        pos: { 
+          x: newX, 
+          y: newY 
+        },
+        collided
+      };
+    });
   }, []);
 
   // Update the player's tetromino (for rotations)
