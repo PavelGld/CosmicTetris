@@ -27,6 +27,30 @@ export const useGameBoard = () => {
     color: string
   }) => {
     try {
+      // Safety check for invalid player data
+      if (!player || !player.tetromino || !Array.isArray(player.tetromino) || player.tetromino.length === 0) {
+        console.error("Invalid player data in updateBoard", player);
+        return { board: prevBoard, rowsCleared: 0 }; // Return original board for safety
+      }
+      
+      // Safety check for invalid board
+      if (!prevBoard || !Array.isArray(prevBoard) || prevBoard.length === 0) {
+        console.error("Invalid board data in updateBoard", prevBoard);
+        return { board: prevBoard, rowsCleared: 0 }; // Return original board for safety
+      }
+      
+      // Safety check for missing color
+      const safeColor = player.color && player.color.trim() !== '' 
+        ? player.color 
+        : '#888888'; // Default color if none provided
+      
+      console.log("Updating board with player:", { 
+        pos: player.pos,
+        tetrominoSize: player.tetromino.length + 'x' + player.tetromino[0].length,
+        color: safeColor,
+        collided: player.collided
+      });
+
       // First, create a clean board that only contains the settled pieces
       // (remove any non-collided tetromino blocks from previous frame)
       const cleanBoard = prevBoard.map(row => 
@@ -36,10 +60,11 @@ export const useGameBoard = () => {
       // Then draw the current tetromino on the clean board
       const newBoard = [...cleanBoard.map(row => [...row])] as BoardType;
       
-      player.tetromino.forEach((row, y) => {
-        row.forEach((value, x) => {
+      // Loop through the tetromino shape and draw it on the board
+      for (let y = 0; y < player.tetromino.length; y++) {
+        for (let x = 0; x < player.tetromino[y].length; x++) {
           // Only draw if the tetromino cell is not empty
-          if (value !== 0) {
+          if (player.tetromino[y][x] !== 0) {
             const boardY = y + player.pos.y;
             const boardX = x + player.pos.x;
             
@@ -50,17 +75,12 @@ export const useGameBoard = () => {
               boardX >= 0 && 
               boardX < newBoard[0].length
             ) {
-              // If collided, use the color, otherwise still use color for active tetromino
-              if (player.collided) {
-                newBoard[boardY][boardX] = player.color;
-              } else if (value > 0) { // we know value is either 0, 1, or 2
-                // Using the actual color instead of 1 to show colored blocks
-                newBoard[boardY][boardX] = player.color;
-              }
+              // Always use the color for consistency
+              newBoard[boardY][boardX] = safeColor;
             }
           }
-        });
-      });
+        }
+      }
 
       // Check if player collided
       if (player.collided) {
@@ -104,27 +124,62 @@ export const useGameBoard = () => {
     tetromino: TetrominoShape,
     collided: boolean
   }, board: BoardType, instantDrop = false) => {
-    // If it's an instant drop, drop until collision
-    if (instantDrop) {
-      let dropHeight = 0;
-      while (!checkCollision(player, board, { x: 0, y: dropHeight + 1 })) {
-        dropHeight += 1;
+    try {
+      // Safety check for invalid player data
+      if (!player || !player.tetromino || !Array.isArray(player.tetromino) || player.tetromino.length === 0) {
+        console.error("Invalid player data in dropTetromino", player);
+        return { ...player, collided: true }; // Stop movement for safety
       }
       
-      return {
-        ...player,
-        pos: { ...player.pos, y: player.pos.y + dropHeight },
-        collided: true
-      };
-    }
+      // Safety check for invalid board
+      if (!board || !Array.isArray(board) || board.length === 0) {
+        console.error("Invalid board data in dropTetromino", board);
+        return { ...player, collided: true }; // Stop movement for safety
+      }
     
-    // Check if the next position would cause a collision
-    if (!checkCollision(player, board, { x: 0, y: 1 })) {
-      // Move the tetromino down
-      return { ...player, pos: { ...player.pos, y: player.pos.y + 1 } };
-    } else {
-      // Collision detected, set collided to true
-      return { ...player, collided: true };
+      // If it's an instant drop, drop until collision
+      if (instantDrop) {
+        let dropHeight = 0;
+        const maxSafeDistance = Math.min(
+          board.length - player.pos.y - 1, // Don't go beyond board height
+          board.length // Hard safety limit
+        );
+        
+        while (
+          dropHeight < maxSafeDistance && 
+          !checkCollision(player, board, { x: 0, y: dropHeight + 1 })
+        ) {
+          dropHeight += 1;
+        }
+        
+        console.log(`Instant drop height: ${dropHeight}, from y=${player.pos.y} to y=${player.pos.y + dropHeight}`);
+        
+        return {
+          ...player,
+          pos: { ...player.pos, y: player.pos.y + dropHeight },
+          collided: dropHeight > 0 // Only mark as collided if we actually moved
+        };
+      }
+      
+      // Regular drop - check if the next position would cause a collision
+      if (!checkCollision(player, board, { x: 0, y: 1 })) {
+        // Make sure we're not going beyond board boundaries
+        const newY = player.pos.y + 1;
+        if (newY < board.length) {
+          // Move the tetromino down
+          return { ...player, pos: { ...player.pos, y: newY } };
+        } else {
+          // Beyond board boundaries, stop movement
+          console.warn("Tried to move beyond board bottom boundary");
+          return { ...player, collided: true };
+        }
+      } else {
+        // Collision detected, set collided to true
+        return { ...player, collided: true };
+      }
+    } catch (error) {
+      console.error("Error in dropTetromino:", error);
+      return { ...player, collided: true }; // Stop movement on error for safety
     }
   }, []);
 

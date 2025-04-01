@@ -85,8 +85,73 @@ export const TETROMINOS: { [key in TetrominoType]: Tetromino } = {
  * Function to get a random tetromino
  */
 export const getRandomTetromino = (): Tetromino => {
-  const tetrominoTypes = Object.keys(TETROMINOS) as TetrominoType[];
-  const randTetromino = 
-    tetrominoTypes[Math.floor(Math.random() * tetrominoTypes.length)];
-  return TETROMINOS[randTetromino];
+  try {
+    const tetrominoTypes = Object.keys(TETROMINOS) as TetrominoType[];
+    
+    // Make sure we have valid tetromino types
+    if (!tetrominoTypes || tetrominoTypes.length === 0) {
+      console.error("No tetromino types available!");
+      // Return a default tetromino as fallback
+      return {
+        type: 'T',
+        shape: [
+          [0, 1, 0],
+          [1, 1, 1],
+          [0, 0, 0]
+        ],
+        color: COLORS.T
+      };
+    }
+    
+    // Get a random type
+    const randIndex = Math.floor(Math.random() * tetrominoTypes.length);
+    const randTetromino = tetrominoTypes[randIndex];
+    
+    // Make sure it's a valid tetromino
+    if (!TETROMINOS[randTetromino]) {
+      console.error("Invalid tetromino type:", randTetromino);
+      // Return a default tetromino as fallback
+      return {
+        type: 'T',
+        shape: [
+          [0, 1, 0],
+          [1, 1, 1],
+          [0, 0, 0]
+        ],
+        color: COLORS.T
+      };
+    }
+    
+    // Create a deep copy to avoid reference issues
+    const tetromino = {
+      ...TETROMINOS[randTetromino],
+      shape: JSON.parse(JSON.stringify(TETROMINOS[randTetromino].shape))
+    };
+    
+    // Verify the shape is valid
+    if (!tetromino.shape || !Array.isArray(tetromino.shape) || tetromino.shape.length === 0) {
+      console.error("Invalid tetromino shape for type:", randTetromino);
+      // Fix the shape
+      tetromino.shape = [
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+      ];
+    }
+    
+    console.log("Generated tetromino:", tetromino.type, "shape size:", tetromino.shape.length + "x" + tetromino.shape[0].length);
+    return tetromino;
+  } catch (error) {
+    console.error("Error in getRandomTetromino:", error);
+    // Return a default tetromino as fallback
+    return {
+      type: 'T',
+      shape: [
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+      ],
+      color: COLORS.T
+    };
+  }
 };

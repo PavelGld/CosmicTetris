@@ -14,33 +14,120 @@ interface PlayerState {
 }
 
 export const usePlayer = () => {
-  // Initialize with a random tetromino to ensure we have color and type
-  const initialTetromino = getRandomTetromino();
+  // Get a valid initial tetromino
+  const getInitialTetromino = (): Tetromino => {
+    try {
+      const tetromino = getRandomTetromino();
+      
+      // Verify that we have a valid tetromino with shape
+      if (!tetromino || !tetromino.shape || !Array.isArray(tetromino.shape) || tetromino.shape.length === 0) {
+        console.error("Invalid initial tetromino, fallback to default T piece");
+        return {
+          type: 'T',
+          shape: [
+            [0, 1, 0],
+            [1, 1, 1],
+            [0, 0, 0]
+          ] as TetrominoShape,
+          color: '#9900FF' // Purple
+        };
+      }
+      
+      return tetromino;
+    } catch (error) {
+      console.error("Error generating initial tetromino:", error);
+      return {
+        type: 'T',
+        shape: [
+          [0, 1, 0],
+          [1, 1, 1],
+          [0, 0, 0]
+        ] as TetrominoShape,
+        color: '#9900FF' // Purple
+      };
+    }
+  };
+  
+  // Initialize with a random tetromino for a proper initial state
+  const initialTetromino = getInitialTetromino();
+  console.log("Initial tetromino:", initialTetromino.type, initialTetromino.shape);
+  
   const [player, setPlayer] = useState<PlayerState>({
-    pos: { x: 0, y: 0 },
-    tetromino: [[0]],
+    pos: { 
+      x: Math.floor(BOARD_WIDTH / 2) - Math.floor(initialTetromino.shape[0].length / 2),
+      y: 0 
+    },
+    tetromino: JSON.parse(JSON.stringify(initialTetromino.shape)), // Use deep copy to avoid reference issues
     collided: false,
-    color: initialTetromino.color, // Set an initial color
-    type: initialTetromino.type    // Set an initial type
+    color: initialTetromino.color,
+    type: initialTetromino.type
   });
   
-  const [nextPiece, setNextPiece] = useState<Tetromino>(getRandomTetromino());
+  // Next piece with the same validation
+  const [nextPiece, setNextPiece] = useState<Tetromino>(getInitialTetromino());
 
   // Function to reset the player
   const resetPlayer = useCallback(() => {
-    const newTetromino = nextPiece;
-    setNextPiece(getRandomTetromino());
-    
-    setPlayer({
-      pos: { 
-        x: Math.floor(BOARD_WIDTH / 2) - Math.floor(newTetromino.shape[0].length / 2),
-        y: 0 
-      },
-      tetromino: newTetromino.shape,
-      collided: false,
-      color: newTetromino.color,
-      type: newTetromino.type
-    });
+    try {
+      // Check if next piece is valid
+      let validNextPiece = nextPiece;
+      
+      // Validate the nextPiece - make sure it has a valid shape
+      if (!validNextPiece || 
+          !validNextPiece.shape || 
+          !Array.isArray(validNextPiece.shape) || 
+          validNextPiece.shape.length === 0 ||
+          !validNextPiece.color) {
+        console.warn("Invalid next piece detected. Generating new tetromino.");
+        validNextPiece = getRandomTetromino();
+      }
+      
+      // Generate new next piece
+      setNextPiece(getRandomTetromino());
+      
+      // Calculate initial X position based on tetromino width
+      const tetrominoWidth = validNextPiece.shape[0].length;
+      const initialX = Math.floor(BOARD_WIDTH / 2) - Math.floor(tetrominoWidth / 2);
+      
+      console.log(`Resetting player with tetromino type: ${validNextPiece.type}, shape: ${validNextPiece.shape.length}x${tetrominoWidth}, color: ${validNextPiece.color}`);
+      
+      // Set player with a deep copy of the tetromino shape to avoid reference issues
+      setPlayer({
+        pos: { 
+          x: initialX,
+          y: 0 
+        },
+        tetromino: JSON.parse(JSON.stringify(validNextPiece.shape)),
+        collided: false,
+        color: validNextPiece.color,
+        type: validNextPiece.type
+      });
+    } catch (error) {
+      console.error("Error in resetPlayer:", error);
+      // Fallback to a default tetromino
+      const defaultTetromino = {
+        type: 'T',
+        shape: [
+          [0, 1, 0],
+          [1, 1, 1],
+          [0, 0, 0]
+        ] as TetrominoShape,
+        color: '#9900FF' // Purple
+      };
+      
+      setNextPiece(getRandomTetromino());
+      
+      setPlayer({
+        pos: { 
+          x: Math.floor(BOARD_WIDTH / 2) - 1, // Default T piece is 3 wide
+          y: 0 
+        },
+        tetromino: defaultTetromino.shape,
+        collided: false,
+        color: defaultTetromino.color,
+        type: defaultTetromino.type
+      });
+    }
   }, [nextPiece]);
 
   // Function to update the player position with boundary checks

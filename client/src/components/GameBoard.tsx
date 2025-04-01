@@ -254,49 +254,33 @@ const GameBoard: React.FC = () => {
     if (gameOver || gamePhase !== GamePhase.PLAYING) return;
     
     try {
-      // Calculate drop distance with a safety limit to prevent infinite loops
-      let dropDistance = 0;
-      // Set a safe maximum distance that won't exceed board boundaries
-      const maxSafeDistance = Math.min(
-        BOARD_HEIGHT - 1, // Ensure we stay within visible board
-        board.length - player.pos.y - 1 // Ensure we don't exceed board array
-      );
+      console.log("Starting hard drop from y=", player.pos.y);
       
-      while (
-        dropDistance < maxSafeDistance && 
-        !checkCollision(player, board, { x: 0, y: dropDistance + 1 })
-      ) {
-        dropDistance += 1;
-      }
+      // Use the updated drop tetromino function with instantDrop=true
+      const droppedPlayer = dropTetromino(player, board, true);
       
-      console.log("Hard drop distance:", dropDistance);
+      // Calculate the distance dropped
+      const dropDistance = droppedPlayer.pos.y - player.pos.y;
+      console.log("Hard drop distance:", dropDistance, "to y=", droppedPlayer.pos.y);
       
       // Add points for hard drop (only if we actually moved)
       if (dropDistance > 0) {
         addHardDropPoints(dropDistance);
-      }
-      
-      // Check if the player is within the valid range
-      if (player.pos.y + dropDistance >= board.length) {
-        console.log("Hard drop would exceed board boundaries");
-        // Adjust to maximum safe distance
-        dropDistance = board.length - player.pos.y - 1;
-      }
-      
-      // Update player position safely
-      if (dropDistance > 0) {
+        
+        // Update player position directly
         updatePlayerPos({
           x: 0,
           y: dropDistance,
           collided: true
         });
+        
         // Play hit sound for feedback
         playHit();
       }
     } catch (error) {
       console.error("Error in hardDrop:", error);
     }
-  }, [gameOver, gamePhase, player, board, updatePlayerPos, addHardDropPoints, playHit]);
+  }, [gameOver, gamePhase, player, board, dropTetromino, updatePlayerPos, addHardDropPoints, playHit]);
   
   // Soft drop the tetromino
   const softDrop = useCallback(() => {
