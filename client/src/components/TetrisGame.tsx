@@ -8,6 +8,7 @@ import { useAudio } from '@/lib/stores/useAudio';
 import StartScreen from './StartScreen';
 import GameDisplay from './GameDisplay';
 import PlanetView from './PlanetView';
+import PlanetOverview from './PlanetOverview';
 
 const TetrisGame = () => {
   const gamePhase = useTetris(state => state.gamePhase);
@@ -67,13 +68,23 @@ const TetrisGame = () => {
         ) : null}
         
         {gamePhase === GamePhase.PLANET_VIEW && (
-          <div className="w-full h-full">
-            <Canvas
-              camera={{ position: [0, 0, 15], fov: 60 }}
-              style={{ width: '100%', height: '100%' }}
-            >
-              <PlanetView />
-            </Canvas>
+          <div className="w-full h-full flex">
+            {/* 2D Planet Overview */}
+            <div className="w-full h-full z-10">
+              <PlanetOverview />
+            </div>
+            
+            {/* 3D Planet Visualization (as background) */}
+            <div className="fixed inset-0 z-0">
+              <Canvas
+                camera={{ position: [0, 0, 15], fov: 60 }}
+                style={{ width: '100%', height: '100%' }}
+                dpr={[1, 1.5]} // Lower resolution for better performance
+                frameloop="demand" // Render only when needed
+              >
+                <PlanetView />
+              </Canvas>
+            </div>
           </div>
         )}
       </div>

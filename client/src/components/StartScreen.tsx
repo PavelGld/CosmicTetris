@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import Leaderboard from './Leaderboard';
 import { useAudio } from '@/lib/stores/useAudio';
+import Polygon2D from './Polygon2D';
 
 interface StartScreenProps {
   hasLoadedGame: boolean;
@@ -18,13 +19,13 @@ const StartScreen: React.FC<StartScreenProps> = ({ hasLoadedGame }) => {
     planetSides, 
     setPlanetSides, 
     setGamePhase, 
-    resetAllSides 
+    resetAllSides,
+    allSides
   } = useTetris();
   
   const [name, setName] = useState(playerName || '');
   const [sides, setSides] = useState(planetSides || 4);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-  
   const { toggleMute, isMuted } = useAudio();
   
   useEffect(() => {
@@ -50,10 +51,26 @@ const StartScreen: React.FC<StartScreenProps> = ({ hasLoadedGame }) => {
   const toggleLeaderboard = () => {
     setShowLeaderboard(!showLeaderboard);
   };
+
+  // Generate number buttons for sides selection
+  const sideButtons = [];
+  for (let i = MIN_SIDES; i <= MAX_SIDES; i++) {
+    sideButtons.push(
+      <Button 
+        key={i}
+        size="sm"
+        variant={sides === i ? "default" : "outline"}
+        className={sides === i ? "bg-purple-600 hover:bg-purple-700" : ""}
+        onClick={() => setSides(i)}
+      >
+        {i}
+      </Button>
+    );
+  }
   
   return (
     <div className="flex items-center justify-center w-full h-full">
-      <div className="bg-black/80 p-8 rounded-lg shadow-lg max-w-md w-full border border-purple-500">
+      <div className="bg-black/80 p-8 rounded-lg shadow-lg w-full max-w-md border border-purple-500">
         <h1 className="text-3xl font-bold text-center text-white mb-6">
           Cosmic Tetris
         </h1>
@@ -80,24 +97,17 @@ const StartScreen: React.FC<StartScreenProps> = ({ hasLoadedGame }) => {
                 <label className="block text-sm font-medium text-gray-200">
                   Planet Sides: {sides}
                 </label>
-                <div className="px-2">
-                  <Slider
-                    value={[sides]}
-                    min={MIN_SIDES}
-                    max={MAX_SIDES}
-                    step={1}
-                    onValueChange={(val) => setSides(val[0])}
-                  />
+                <div className="mx-auto flex items-center justify-center mb-3">
+                  <Polygon2D sides={sides} size={150} boardData={allSides} />
                 </div>
-                <div className="flex justify-between text-xs text-gray-400">
-                  <span>{MIN_SIDES}</span>
-                  <span>{MAX_SIDES}</span>
+                <div className="flex justify-center gap-1 mb-2">
+                  {sideButtons}
                 </div>
               </div>
               
               <div className="pt-4 space-y-3">
                 <Button 
-                  className="w-full" 
+                  className="w-full bg-purple-600 hover:bg-purple-700" 
                   onClick={startNewGame}
                   disabled={!name.trim()}
                 >
@@ -107,7 +117,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ hasLoadedGame }) => {
                 {hasLoadedGame && (
                   <Button 
                     variant="outline" 
-                    className="w-full" 
+                    className="w-full border-purple-500 text-purple-500 hover:bg-purple-500/10" 
                     onClick={continueGame}
                   >
                     Continue Game
@@ -116,7 +126,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ hasLoadedGame }) => {
                 
                 <Button
                   variant="ghost"
-                  className="w-full"
+                  className="w-full hover:bg-purple-500/10"
                   onClick={toggleLeaderboard}
                 >
                   Leaderboard
@@ -125,7 +135,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ hasLoadedGame }) => {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full",
+                    "w-full hover:bg-purple-500/10",
                     isMuted ? "text-gray-400" : "text-white"
                   )}
                   onClick={toggleMute}
@@ -140,7 +150,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ hasLoadedGame }) => {
             <Leaderboard />
             <div className="mt-6">
               <Button
-                className="w-full"
+                className="w-full bg-purple-600 hover:bg-purple-700"
                 onClick={toggleLeaderboard}
               >
                 Back to Menu
