@@ -267,15 +267,31 @@ const GameBoard: React.FC = () => {
       
       console.log("Hard drop distance:", dropDistance);
       
-      // Add points for hard drop
-      addHardDropPoints(dropDistance);
+      // Add points for hard drop (only if we actually moved)
+      if (dropDistance > 0) {
+        addHardDropPoints(dropDistance);
+      }
       
-      // Update player position
-      updatePlayerPos({
-        x: 0,
-        y: dropDistance,
-        collided: true
-      });
+      // Check if dropping would cause immediate game over
+      const newY = player.pos.y + dropDistance;
+      const wouldCauseGameOver = newY < HIDDEN_ROWS && dropDistance > 0;
+      
+      if (wouldCauseGameOver) {
+        console.log("Hard drop would cause game over");
+        // Just do a normal drop instead to let the game over logic handle it normally
+        updatePlayerPos({
+          x: 0,
+          y: 1,
+          collided: false
+        });
+      } else {
+        // Update player position normally
+        updatePlayerPos({
+          x: 0,
+          y: dropDistance,
+          collided: dropDistance > 0 // Only set collided if we actually moved
+        });
+      }
     } catch (error) {
       console.error("Error in hardDrop:", error);
     }

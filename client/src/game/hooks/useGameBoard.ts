@@ -50,11 +50,12 @@ export const useGameBoard = () => {
               boardX >= 0 && 
               boardX < newBoard[0].length
             ) {
-              // If collided, use the color, otherwise use 1 for active tetromino
+              // If collided, use the color, otherwise still use color for active tetromino
               if (player.collided) {
                 newBoard[boardY][boardX] = player.color;
               } else if (value > 0) { // we know value is either 0, 1, or 2
-                newBoard[boardY][boardX] = 1;
+                // Using the actual color instead of 1 to show colored blocks
+                newBoard[boardY][boardX] = player.color;
               }
             }
           }
