@@ -359,6 +359,12 @@ const GameBoard: React.FC = () => {
   
   const visibleRows = board.slice(HIDDEN_ROWS);
   
+  // Debug: Log the game board state and player position
+  console.log("Player position:", player.pos);
+  console.log("Player tetromino:", player.tetromino);
+  console.log("Player color:", player.color);
+  console.log("Sample board cells:", board[player.pos.y][player.pos.x], board[player.pos.y][player.pos.x+1]);
+  
   return (
     <div
       style={{
