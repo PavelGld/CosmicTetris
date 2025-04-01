@@ -10,7 +10,7 @@ interface PlayerState {
   tetromino: TetrominoShape;
   collided: boolean;
   color: string;
-  type: string;
+  type: string; // Note: This should match TetrominoType, but we're keeping it as string for backward compatibility
 }
 
 export const usePlayer = () => {

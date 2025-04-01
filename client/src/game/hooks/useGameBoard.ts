@@ -3,7 +3,7 @@ import { BOARD_HEIGHT, BOARD_WIDTH } from '../constants';
 import { checkCollision, sweepRows } from '../utils';
 import { TetrominoShape } from '../tetrominos';
 
-type BoardType = (string | number)[][];
+type BoardType = (string | 0 | 1 | 2)[][];
 
 export const useGameBoard = () => {
   const [board, setBoard] = useState<BoardType>(() => 
@@ -26,27 +26,55 @@ export const useGameBoard = () => {
     collided: boolean,
     color: string
   }) => {
-    // First create a copy of the previous board
-    const newBoard = [...prevBoard.map(row => [...row])];
+    try {
+      // First, create a clean board that only contains the settled pieces
+      // (remove any non-collided tetromino blocks from previous frame)
+      const cleanBoard = prevBoard.map(row => 
+        row.map(cell => (typeof cell === 'string' ? cell : 0))
+      ) as BoardType;
 
-    // Then draw the tetromino
-    player.tetromino.forEach((row, y) => {
-      row.forEach((value, x) => {
-        if (value !== 0) {
-          newBoard[y + player.pos.y][x + player.pos.x] = 
-            player.collided ? player.color : value;
-        }
+      // Then draw the current tetromino on the clean board
+      const newBoard = [...cleanBoard.map(row => [...row])] as BoardType;
+      
+      player.tetromino.forEach((row, y) => {
+        row.forEach((value, x) => {
+          // Only draw if the tetromino cell is not empty
+          if (value !== 0) {
+            const boardY = y + player.pos.y;
+            const boardX = x + player.pos.x;
+            
+            // Make sure we don't draw outside the board
+            if (
+              boardY >= 0 && 
+              boardY < newBoard.length && 
+              boardX >= 0 && 
+              boardX < newBoard[0].length
+            ) {
+              // If collided, use the color, otherwise use 1 for active tetromino
+              if (player.collided) {
+                newBoard[boardY][boardX] = player.color;
+              } else if (value > 0) { // we know value is either 0, 1, or 2
+                newBoard[boardY][boardX] = 1;
+              }
+            }
+          }
+        });
       });
-    });
 
-    // Check if player collided
-    if (player.collided) {
-      // Sweep the completed rows
-      const { newBoard: sweptBoard, rowsCleared } = sweepRows(newBoard);
-      return { board: sweptBoard, rowsCleared };
+      // Check if player collided
+      if (player.collided) {
+        // Sweep the completed rows
+        const { newBoard: sweptBoard, rowsCleared } = sweepRows(newBoard);
+        setBoard(sweptBoard); // Immediately update the board state
+        return { board: sweptBoard, rowsCleared };
+      }
+
+      setBoard(newBoard); // Immediately update the board state
+      return { board: newBoard, rowsCleared: 0 };
+    } catch (error) {
+      console.error("Error in updateBoard:", error);
+      return { board: prevBoard, rowsCleared: 0 };
     }
-
-    return { board: newBoard, rowsCleared: 0 };
   }, []);
 
   // Move the tetromino function for horizontal movement

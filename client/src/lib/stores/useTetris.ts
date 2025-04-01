@@ -2,19 +2,21 @@ import { create } from 'zustand';
 import { GamePhase, STORAGE_KEYS } from '@/game/constants';
 import { getLocalStorage, setLocalStorage } from '@/lib/utils';
 
+import { TetrominoShape, TetrominoType } from '@/game/tetrominos';
+
 export interface PlanetSide {
   id: number;
-  board: (string | number)[][];
+  board: (string | 0 | 1 | 2)[][];
   player: {
     pos: { x: number; y: number };
-    tetromino: (0 | 1 | 2)[][];
+    tetromino: TetrominoShape;
     collided: boolean;
     color: string;
     type: string;
   };
   nextPiece: {
     type: string;
-    shape: (0 | 1 | 2)[][];
+    shape: TetrominoShape;
     color: string;
   };
   gameStatus: {

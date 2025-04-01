@@ -4,7 +4,7 @@ import { TetrominoShape } from './tetrominos';
 /**
  * Creates an empty game board
  */
-export const createEmptyBoard = (): (string | number)[][] => 
+export const createEmptyBoard = (): (string | 0 | 1 | 2)[][] => 
   Array.from(Array(BOARD_HEIGHT + 5), () => 
     Array(BOARD_WIDTH).fill(0)
   );
@@ -14,7 +14,7 @@ export const createEmptyBoard = (): (string | number)[][] =>
  */
 export const checkCollision = (
   player: { pos: { x: number; y: number }; tetromino: TetrominoShape },
-  board: (string | number)[][],
+  board: (string | 0 | 1 | 2)[][],
   { x: moveX, y: moveY }: { x: number; y: number }
 ): boolean => {
   // Using for loops for better readability
@@ -50,8 +50,8 @@ export const calculateScore = (rowsCleared: number, level: number): number => {
 /**
  * Check and sweep rows that are full
  */
-export const sweepRows = (board: (string | number)[][]): {
-  newBoard: (string | number)[][];
+export const sweepRows = (board: (string | 0 | 1 | 2)[][]): {
+  newBoard: (string | 0 | 1 | 2)[][];
   rowsCleared: number;
 } => {
   let rowsCleared = 0;
@@ -65,7 +65,7 @@ export const sweepRows = (board: (string | number)[][]): {
     }
     acc.push(row);
     return acc;
-  }, [] as (string | number)[][]);
+  }, [] as (string | 0 | 1 | 2)[][]);
 
   return { newBoard, rowsCleared };
 };

@@ -2,7 +2,7 @@ import React from 'react';
 import { CELL_SIZE } from '@/game/constants';
 
 interface CellProps {
-  type: string | number;
+  type: string | 0 | 1 | 2;
 }
 
 const Cell: React.FC<CellProps> = ({ type }) => {

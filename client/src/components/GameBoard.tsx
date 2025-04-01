@@ -76,7 +76,13 @@ const GameBoard: React.FC = () => {
           color: sideData.player.color
         });
         
-        setPlayerState(sideData.player, sideData.nextPiece);
+        // Cast the nextPiece to Tetromino type for compatibility with strict typing
+        const typedNextPiece = {
+          ...sideData.nextPiece,
+          type: sideData.nextPiece.type as any
+        };
+        
+        setPlayerState(sideData.player, typedNextPiece);
         loadGameStatus(sideData.gameStatus);
         
         // Start the game timer and droptime if the game is not over
@@ -247,21 +253,32 @@ const GameBoard: React.FC = () => {
   const hardDrop = useCallback(() => {
     if (gameOver || gamePhase !== GamePhase.PLAYING) return;
     
-    // Calculate drop distance
-    let dropDistance = 0;
-    while (!checkCollision(player, board, { x: 0, y: dropDistance + 1 })) {
-      dropDistance += 1;
+    try {
+      // Calculate drop distance with a safety limit to prevent infinite loops
+      let dropDistance = 0;
+      const maxDistance = BOARD_HEIGHT + HIDDEN_ROWS;
+      
+      while (
+        dropDistance < maxDistance && 
+        !checkCollision(player, board, { x: 0, y: dropDistance + 1 })
+      ) {
+        dropDistance += 1;
+      }
+      
+      console.log("Hard drop distance:", dropDistance);
+      
+      // Add points for hard drop
+      addHardDropPoints(dropDistance);
+      
+      // Update player position
+      updatePlayerPos({
+        x: 0,
+        y: dropDistance,
+        collided: true
+      });
+    } catch (error) {
+      console.error("Error in hardDrop:", error);
     }
-    
-    // Add points for hard drop
-    addHardDropPoints(dropDistance);
-    
-    // Update player position
-    updatePlayerPos({
-      x: 0,
-      y: dropDistance,
-      collided: true
-    });
   }, [gameOver, gamePhase, player, board, updatePlayerPos, addHardDropPoints]);
   
   // Soft drop the tetromino

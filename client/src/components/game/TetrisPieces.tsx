@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { Box } from '@react-three/drei';
 import * as THREE from 'three';
-import { TetriminoType } from '@/lib/tetris';
+import { TetrominoType, TetrominoShape } from '@/game/tetrominos';
 
 interface TetrisPieceProps {
-  pieceType: TetriminoType;
+  pieceType: TetrominoType;
   color: string;
   position: [number, number, number];
   rotation: [number, number, number];
-  shape: number[][];
+  shape: TetrominoShape;
   cellSize: number;
   isGhost?: boolean;
 }
@@ -29,7 +29,7 @@ export const TetrisPiece: React.FC<TetrisPieceProps> = ({
     
     for (let y = 0; y < shape.length; y++) {
       for (let x = 0; x < shape[y].length; x++) {
-        if (shape[y][x]) {
+        if (shape[y][x] !== 0) {
           blocks.push(
             <Box 
               key={`${x}-${y}`}
@@ -62,9 +62,9 @@ export const TetrisPiece: React.FC<TetrisPieceProps> = ({
 
 // Component to display the next piece preview
 export const NextPiecePreview: React.FC<{
-  pieceType: TetriminoType;
+  pieceType: TetrominoType;
   color: string;
-  shape: number[][];
+  shape: TetrominoShape;
 }> = ({ pieceType, color, shape }) => {
   const cellSize = 0.7;
   
