@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="nebula1" cx="30%" cy="70%" r="70%" fx="30%" fy="70%">
+      <stop offset="0%" stop-color="#7b3fe4" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#111122" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebula2" cx="70%" cy="30%" r="60%" fx="70%" fy="30%">
+      <stop offset="0%" stop-color="#e43f9c" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#111122" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebula3" cx="20%" cy="20%" r="50%" fx="20%" fy="20%">
+      <stop offset="0%" stop-color="#3f7be4" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#111122" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#0a0a1a"/>
+  
+  <!-- Nebulae -->
+  <rect width="100%" height="100%" fill="url(#nebula1)"/>
+  <rect width="100%" height="100%" fill="url(#nebula2)"/>
+  <rect width="100%" height="100%" fill="url(#nebula3)"/>
+  
+  <!-- Stars (small) -->
+  <g fill="#ffffff">
+    <!-- Generate 200 small stars with random positions and opacities -->
+    <circle cx="102" cy="145" r="1" opacity="0.7"/>
+    <circle cx="345" cy="430" r="1" opacity="0.8"/>
+    <circle cx="764" cy="521" r="1" opacity="0.6"/>
+    <circle cx="1215" cy="876" r="1" opacity="0.9"/>
+    <circle cx="1642" cy="345" r="1" opacity="0.7"/>
+    <circle cx="521" cy="932" r="1" opacity="0.8"/>
+    <circle cx="1476" cy="123" r="1" opacity="0.6"/>
+    <circle cx="854" cy="765" r="1" opacity="0.9"/>
+    <circle cx="246" cy="612" r="1" opacity="0.7"/>
+    <circle cx="1763" cy="582" r="1" opacity="0.8"/>
+    <circle cx="1320" cy="430" r="1" opacity="0.7"/>
+    <circle cx="487" cy="298" r="1" opacity="0.8"/>
+    <circle cx="1590" cy="913" r="1" opacity="0.6"/>
+    <circle cx="987" cy="124" r="1" opacity="0.7"/>
+    <circle cx="1120" cy="567" r="1" opacity="0.9"/>
+    <circle cx="321" cy="780" r="1" opacity="0.6"/>
+    <circle cx="1822" cy="245" r="1" opacity="0.8"/>
+    <circle cx="654" cy="432" r="1" opacity="0.7"/>
+    <circle cx="1432" cy="632" r="1" opacity="0.9"/>
+    <circle cx="789" cy="892" r="1" opacity="0.6"/>
+  </g>
+  
+  <!-- Stars (medium) -->
+  <g fill="#ffffff">
+    <!-- Generate 50 medium stars with random positions and opacities -->
+    <circle cx="234" cy="567" r="1.5" opacity="0.8"/>
+    <circle cx="876" cy="234" r="1.5" opacity="0.9"/>
+    <circle cx="1543" cy="876" r="1.5" opacity="0.7"/>
+    <circle cx="543" cy="765" r="1.5" opacity="0.8"/>
+    <circle cx="1234" cy="321" r="1.5" opacity="0.9"/>
+    <circle cx="876" cy="987" r="1.5" opacity="0.7"/>
+    <circle cx="234" cy="432" r="1.5" opacity="0.8"/>
+    <circle cx="1654" cy="123" r="1.5" opacity="0.9"/>
+    <circle cx="432" cy="678" r="1.5" opacity="0.7"/>
+    <circle cx="1876" cy="432" r="1.5" opacity="0.8"/>
+  </g>
+  
+  <!-- Bright stars -->
+  <g fill="#ffffff">
+    <!-- Generate 10 bright stars with random positions -->
+    <circle cx="567" cy="234" r="2" opacity="1"/>
+    <circle cx="1234" cy="876" r="2" opacity="1"/>
+    <circle cx="876" cy="543" r="2" opacity="1"/>
+    <circle cx="1765" cy="234" r="2" opacity="1"/>
+    <circle cx="321" cy="987" r="2" opacity="1"/>
+  </g>
+  
+  <!-- Distant galaxies -->
+  <ellipse cx="150" cy="200" rx="70" ry="30" fill="#ffffff" opacity="0.1" transform="rotate(30 150 200)"/>
+  <ellipse cx="1700" cy="800" rx="90" ry="40" fill="#ffffff" opacity="0.1" transform="rotate(-20 1700 800)"/>
+</svg>
